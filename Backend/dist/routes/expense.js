@@ -80,7 +80,6 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
 router.post('/createexpense', auth_1.authenticateJwt, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.headers["userId"];
-        console.log(userId);
         const parsedExpense = validator_1.expense.safeParse(req.body);
         if (!parsedExpense.success || !parsedExpense.data || !userId) {
             return res.status(400).json({ message: "All Filed are required to create expense!" });
@@ -125,7 +124,6 @@ router.post('/createexpense', auth_1.authenticateJwt, (req, res) => __awaiter(vo
 router.put('/update/:expenseid', auth_1.authenticateJwt, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.headers["userId"];
-        console.log(userId);
         const expenseId = req.params.expenseid;
         const parsedExpense = validator_1.expense.safeParse(req.body);
         if (!parsedExpense.success) {
@@ -167,6 +165,28 @@ router.put('/update/:expenseid', auth_1.authenticateJwt, (req, res) => __awaiter
     }
     catch (error) {
         res.status(400).json({ message: error.message });
+    }
+}));
+router.get('/getexpenses', auth_1.authenticateJwt, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.headers["userId"];
+        const userExist = yield prisma.user.findUnique({
+            where: {
+                id: parseInt(userId)
+            }
+        });
+        if (!userExist) {
+            return res.status(400).json({ message: "user Not found!" });
+        }
+        const history = yield prisma.expenses.findMany({
+            where: {
+                authorId: parseInt(userId)
+            }
+        });
+        res.status(200).json({ history });
+    }
+    catch (error) {
+        return res.status(400).json({ message: error.messsage });
     }
 }));
 exports.default = router;

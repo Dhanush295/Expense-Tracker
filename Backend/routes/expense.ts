@@ -87,7 +87,7 @@ router.post('/signup', async (req: Request, res: Response) => {
     router.post('/createexpense',authenticateJwt ,async(req:Request, res: Response)=>{
       try{
         const userId  = req.headers["userId"] as string;
-        console.log(userId)
+        
         const parsedExpense = expense.safeParse(req.body);
 
         if(! parsedExpense.success || !parsedExpense.data || !userId){
@@ -139,7 +139,7 @@ router.post('/signup', async (req: Request, res: Response) => {
     router.put('/update/:expenseid',authenticateJwt ,async (req: Request, res: Response) => {
       try{
         const userId  = req.headers["userId"] as string;
-        console.log(userId);
+    
         const expenseId = req.params.expenseid ;
 
         const parsedExpense = expense.safeParse(req.body);
@@ -183,6 +183,10 @@ router.post('/signup', async (req: Request, res: Response) => {
             },
           },
         });
+
+        if(!update){
+          res.status(404).json({message: "Expense cannot be Updated"})
+        }
         return res.status(200).json({ message: "Expense Updated successfully" });
 
 
@@ -190,5 +194,78 @@ router.post('/signup', async (req: Request, res: Response) => {
         res.status(400).json({message: error.message})
       }
     });
+
+    router.get('/getexpenses', authenticateJwt, async(req: Request, res: Response)=>{
+      try{
+        const userId  = req.headers["userId"] as string;
+
+        const userExist = await prisma.user.findUnique({
+          where: {
+            id : parseInt(userId)
+          }
+        });
+
+        if(!userExist){
+          return res.status(400).json({message: "user Not found!"})
+        }
+
+        const history = await prisma.expenses.findMany({
+          where: {
+            authorId : parseInt(userId)
+          }
+        })
+        if(!history){
+          return res.status(400).json({message: "No expenses Found At this time"})
+        }
+
+        return res.status(200).json({history})
+
+      }catch(error: any){
+        return res.status(400).json({message: error.messsage})
+      }
+    });
+  
+    router.delete('/expense/:id', authenticateJwt, async (req: Request, res: Response)=>{
+      try{
+
+        const userId  = req.headers["userId"] as string;
+        const deleteId = req.params.id;
+
+        const userExist = await prisma.user.findUnique({
+          where: {
+            id : parseInt(userId)
+          }
+        });
+
+        if(!userExist){
+          return res.status(400).json({message: "user Not found!"})
+        }
+        
+        const expenseExist = await prisma.expenses.findFirst({
+          where: {
+            id: parseInt(deleteId),
+            authorId : parseInt(userId)
+          }
+        })
+        if(!expenseExist){
+          return res.status(400).json({message: " Expense Not found! "})
+        } 
+
+        const deleteExpense = await prisma.expenses.delete({
+          where: {
+            id: parseInt(deleteId)
+          }
+        })
+
+        if(!deleteExpense){
+          return res.status(400).json({message: " Expense Not found!"})
+        }
+
+        return res.status(200).json({message: "Expense Deleted Successfully!"})
+
+      }catch(error: any){
+        res.status(400).json({message: error.message})
+      }
+    })
 
 export default router;
