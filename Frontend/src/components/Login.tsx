@@ -17,13 +17,13 @@ import axios from 'axios';
 const defaultTheme = createTheme();
 
 export default function Login() {
-    const [ username, setUsername ] = useState<string>('');
+    const [ email, setEmail ] = useState<string>('');
     const [ password, setPassword ] = useState<string>('');
 
   const handleSubmit = async function addata() {
     try {
     
-      const res = await axios.post("http://localhost:3000/login", { username, password });
+      const res = await axios.post("http://localhost:3000/login", { email, password });
       localStorage.setItem("key", res.data.token);
       window.location.assign('/home');
     } catch (error) {
@@ -60,7 +60,7 @@ export default function Login() {
               name="Username"
               autoComplete="email"
               autoFocus
-              onChange={(e)=>{ setUsername(e.target.value)}}
+              onChange={(e)=>{ setEmail(e.target.value)}}
             />
             <TextField
               margin="normal"

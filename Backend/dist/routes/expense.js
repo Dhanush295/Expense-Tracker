@@ -51,7 +51,7 @@ router.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function*
 router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const parsedUser = validator_1.userCred.safeParse(req.body);
-        if (!parsedUser.success || !parsedUser.data.email || !parsedUser.data.password) {
+        if (!parsedUser.success || !parsedUser.data) {
             return res.status(400).json({ message: "Email and Password Required!" });
         }
         const userdetails = parsedUser.data;
@@ -161,6 +161,9 @@ router.put('/update/:expenseid', auth_1.authenticateJwt, (req, res) => __awaiter
                 },
             },
         });
+        if (!update) {
+            res.status(404).json({ message: "Expense cannot be Updated" });
+        }
         return res.status(200).json({ message: "Expense Updated successfully" });
     }
     catch (error) {
@@ -183,10 +186,48 @@ router.get('/getexpenses', auth_1.authenticateJwt, (req, res) => __awaiter(void 
                 authorId: parseInt(userId)
             }
         });
-        res.status(200).json({ history });
+        if (!history) {
+            return res.status(400).json({ message: "No expenses Found At this time" });
+        }
+        return res.status(200).json({ history });
     }
     catch (error) {
         return res.status(400).json({ message: error.messsage });
+    }
+}));
+router.delete('/expense/:id', auth_1.authenticateJwt, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.headers["userId"];
+        const deleteId = req.params.id;
+        const userExist = yield prisma.user.findUnique({
+            where: {
+                id: parseInt(userId)
+            }
+        });
+        if (!userExist) {
+            return res.status(400).json({ message: "user Not found!" });
+        }
+        const expenseExist = yield prisma.expenses.findFirst({
+            where: {
+                id: parseInt(deleteId),
+                authorId: parseInt(userId)
+            }
+        });
+        if (!expenseExist) {
+            return res.status(400).json({ message: " Expense Not found! " });
+        }
+        const deleteExpense = yield prisma.expenses.delete({
+            where: {
+                id: parseInt(deleteId)
+            }
+        });
+        if (!deleteExpense) {
+            return res.status(400).json({ message: " Expense Not found!" });
+        }
+        return res.status(200).json({ message: "Expense Deleted Successfully!" });
+    }
+    catch (error) {
+        res.status(400).json({ message: error.message });
     }
 }));
 exports.default = router;
