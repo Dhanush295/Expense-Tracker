@@ -5,12 +5,22 @@ import  jwt  from "jsonwebtoken";
 import { authenticateJwt, SECRET } from "../middlewear/auth";
 import { z } from 'zod/lib';
 import { userCred, expense } from '../zod/validator';
+
 const prisma = new PrismaClient()
 const router = express.Router();
 
 interface IUserdetails {
     email: string,
     password: string
+}
+
+interface  Iexpense {
+  title :  string,     
+  description :  string,          
+  amount:   number,
+  date: string,
+  type:  string, 
+  category:   string
 }
 
 router.post('/signup', async (req: Request, res: Response) => {
@@ -71,6 +81,65 @@ router.post('/signup', async (req: Request, res: Response) => {
       } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
+      }
+    });
+
+    router.post('/createexpense',authenticateJwt ,async(req:Request, res: Response)=>{
+      try{
+        const userId  = req.headers["userId"] as string;
+        const parsedExpense = expense.safeParse(req.body);
+
+        if(! parsedExpense.success || !parsedExpense.data || !userId){
+          return res.status(400).json({message: "All Filed are required to create expense!"});
+        }
+        const newExpense: Iexpense = parsedExpense.data;
+
+        const user = await prisma.user.findUnique({
+          where: {
+            id: parseInt(userId),
+          },
+        });
+    
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+    
+        const expenseExist = await prisma.expenses.findFirst({
+          where: {
+            authorId: parseInt(userId),
+            title: newExpense.title,
+          },
+        });
+    
+        if (expenseExist) {
+          return res.status(400).json({ message: "Expense already exists" });
+        }
+    
+        const createExpense = await prisma.expenses.create({
+          data: {
+            title: newExpense.title,
+            description: newExpense.description,
+            date: newExpense.date,
+            category: newExpense.category,
+            amount: newExpense.amount,
+            type: newExpense.type,
+            author: {
+              connect: { id: parseInt(userId) }, 
+            },
+          },
+        });
+    
+        return res.status(200).json({ message: "Expense created successfully" });
+      } catch (error: any) {
+        res.status(500).json({ message: error.message });
+      }
+    });
+
+    router.put('/update',async (req: Request, res: Response) => {
+      try{
+
+      }catch(error: any){
+        res.status(400).json({message: error.message})
       }
     });
 

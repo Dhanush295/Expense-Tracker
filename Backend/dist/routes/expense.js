@@ -77,4 +77,48 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }));
+router.post('/createexpense', auth_1.authenticateJwt, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.headers["userId"];
+        const parsedExpense = validator_1.expense.safeParse(req.body);
+        if (!parsedExpense.success) {
+            return res.status(400).json({ message: "All Filed are required to create expense!" });
+        }
+        const newExpense = parsedExpense.data;
+        const user = yield prisma.user.findUnique({
+            where: {
+                id: parseInt(userId),
+            },
+        });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const expenseExist = yield prisma.expenses.findFirst({
+            where: {
+                authorId: parseInt(userId),
+                title: newExpense.title,
+            },
+        });
+        if (expenseExist) {
+            return res.status(400).json({ message: "Expense already exists" });
+        }
+        const createExpense = yield prisma.expenses.create({
+            data: {
+                title: newExpense.title,
+                description: newExpense.description,
+                date: newExpense.date,
+                category: newExpense.category,
+                amount: newExpense.amount,
+                type: newExpense.type,
+                author: {
+                    connect: { id: parseInt(userId) },
+                },
+            },
+        });
+        return res.status(200).json({ message: "Expense created successfully" });
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}));
 exports.default = router;
