@@ -80,8 +80,9 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
 router.post('/createexpense', auth_1.authenticateJwt, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.headers["userId"];
+        console.log(userId);
         const parsedExpense = validator_1.expense.safeParse(req.body);
-        if (!parsedExpense.success) {
+        if (!parsedExpense.success || !parsedExpense.data || !userId) {
             return res.status(400).json({ message: "All Filed are required to create expense!" });
         }
         const newExpense = parsedExpense.data;
@@ -119,6 +120,53 @@ router.post('/createexpense', auth_1.authenticateJwt, (req, res) => __awaiter(vo
     }
     catch (error) {
         res.status(500).json({ message: error.message });
+    }
+}));
+router.put('/update/:expenseid', auth_1.authenticateJwt, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.headers["userId"];
+        console.log(userId);
+        const expenseId = req.params.expenseid;
+        const parsedExpense = validator_1.expense.safeParse(req.body);
+        if (!parsedExpense.success) {
+            return res.status(400).json({ message: "All Filed are required to create expense!" });
+        }
+        const newExpense = parsedExpense.data;
+        const user = yield prisma.user.findUnique({
+            where: {
+                id: parseInt(userId),
+            },
+        });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const updateExpense = yield prisma.expenses.findFirst({
+            where: {
+                id: parseInt(expenseId),
+                authorId: parseInt(userId)
+            }
+        });
+        if (!updateExpense) {
+            res.status(404).json({ message: "Expense Not Found" });
+        }
+        const update = yield prisma.expenses.update({
+            where: { id: parseInt(expenseId) },
+            data: {
+                title: newExpense.title,
+                description: newExpense.description,
+                date: newExpense.date,
+                category: newExpense.category,
+                amount: newExpense.amount,
+                type: newExpense.type,
+                author: {
+                    connect: { id: parseInt(userId) },
+                },
+            },
+        });
+        return res.status(200).json({ message: "Expense Updated successfully" });
+    }
+    catch (error) {
+        res.status(400).json({ message: error.message });
     }
 }));
 exports.default = router;

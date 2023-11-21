@@ -87,6 +87,7 @@ router.post('/signup', async (req: Request, res: Response) => {
     router.post('/createexpense',authenticateJwt ,async(req:Request, res: Response)=>{
       try{
         const userId  = req.headers["userId"] as string;
+        console.log(userId)
         const parsedExpense = expense.safeParse(req.body);
 
         if(! parsedExpense.success || !parsedExpense.data || !userId){
@@ -135,8 +136,55 @@ router.post('/signup', async (req: Request, res: Response) => {
       }
     });
 
-    router.put('/update',async (req: Request, res: Response) => {
+    router.put('/update/:expenseid',authenticateJwt ,async (req: Request, res: Response) => {
       try{
+        const userId  = req.headers["userId"] as string;
+        console.log(userId);
+        const expenseId = req.params.expenseid ;
+
+        const parsedExpense = expense.safeParse(req.body);
+
+        if(! parsedExpense.success ){
+          return res.status(400).json({message: "All Filed are required to create expense!"});
+        }
+        const newExpense: Iexpense = parsedExpense.data;
+
+        const user = await prisma.user.findUnique({
+          where: {
+            id: parseInt(userId),
+          },
+        });
+    
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        const updateExpense = await prisma.expenses.findFirst({
+          where: {
+            id : parseInt(expenseId),
+            authorId: parseInt(userId)
+            }
+        }); 
+
+        if(!updateExpense){
+          res.status(404).json({message: "Expense Not Found"})
+        }
+        const update = await prisma.expenses.update({
+          where: { id: parseInt(expenseId) },
+          data: {
+            title: newExpense.title,
+            description: newExpense.description,
+            date: newExpense.date,
+            category: newExpense.category,
+            amount: newExpense.amount,
+            type: newExpense.type,
+            author: {
+              connect: { id: parseInt(userId) }, 
+            },
+          },
+        });
+        return res.status(200).json({ message: "Expense Updated successfully" });
+
 
       }catch(error: any){
         res.status(400).json({message: error.message})
