@@ -25,7 +25,7 @@ export default function Login() {
     
       const res = await axios.post("http://localhost:3000/login", { email, password });
       localStorage.setItem("key", res.data.token);
-      window.location.assign('/home');
+      window.location.assign('/');
     } catch (error) {
       console.error("Error during signup:", error);
     }

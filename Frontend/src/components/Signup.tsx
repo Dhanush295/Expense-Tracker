@@ -27,7 +27,7 @@ export default function Signup() {
     const res = await axios.post("http://localhost:3000/signup", { username, password });
     
     alert(res.data.message);
-    navigate("/");
+    navigate("/login");
   } catch (error) {
     console.error("Error during signup:", error);
   }
