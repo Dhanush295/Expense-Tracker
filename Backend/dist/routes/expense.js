@@ -23,7 +23,7 @@ const router = express_1.default.Router();
 router.post('/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const parsedUser = validator_1.userCred.safeParse(req.body);
-        if (!parsedUser.success || !parsedUser.data.email || !parsedUser.data.password) {
+        if (!parsedUser.success) {
             return res.status(400).json({ message: "Email and Password Required!" });
         }
         const userDetails = parsedUser.data;

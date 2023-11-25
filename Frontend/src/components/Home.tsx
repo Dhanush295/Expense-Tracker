@@ -6,6 +6,7 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 
 function DisplayExpenses(){
@@ -39,6 +40,9 @@ function DisplayExpenses(){
 }
 
 function CreateExpense(){
+
+
+
     return (
         <div style={{display: 'flex', justifyContent: 'center'}}>
         <Card sx={{ minWidth: 275, maxWidth: 500, marginTop: 5}}>
@@ -49,7 +53,7 @@ function CreateExpense(){
             <div>
                 <div >
                     <div style={{ margin: 10}}>
-                        <TextField label="Title" id="outlined-size-small"size="small"/>
+                        <TextField label="Title" id="outlined-size-small"size="small" />
                     </div>
                     <div style={{ margin: 10}}>
                         <TextField label="Description" id="outlined-size-normal" size="small" />
@@ -97,4 +101,8 @@ export function Home(){
     </div>
         
     );
+}
+
+function useState(title: any): [any, any] {
+    throw new Error('Function not implemented.');
 }

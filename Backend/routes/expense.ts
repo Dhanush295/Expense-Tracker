@@ -26,7 +26,7 @@ interface  Iexpense {
 router.post('/signup', async (req: Request, res: Response) => {
     try{
       const parsedUser = userCred.safeParse(req.body);
-      if (!parsedUser.success || !parsedUser.data.email || !parsedUser.data.password) {
+      if (!parsedUser.success ) {
         return res.status(400).json({ message: "Email and Password Required!" });
     }
       const userDetails: IUserdetails = parsedUser.data;

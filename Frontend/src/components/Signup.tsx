@@ -17,14 +17,14 @@ import {  useNavigate  } from 'react-router-dom';
 const defaultTheme = createTheme();
 
 export default function Signup() {
-    const [ username, setUsername ] = useState<string>('');
+    const [ email, setUsername ] = useState<string>('');
     const [ password, setPassword ] = useState<string>('');
     const navigate =  useNavigate ();
 
   const handleSubmit = async function updateUser() {
   try {
     
-    const res = await axios.post("http://localhost:3000/signup", { username, password });
+    const res = await axios.post("http://localhost:3000/signup", { email, password });
     
     alert(res.data.message);
     navigate("/login");
@@ -57,10 +57,10 @@ export default function Signup() {
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="username"
-              name="username"
-              autoComplete="username"
+              id="email"
+              label="email"
+              name="email"
+              autoComplete="email"
               autoFocus
               onChange={(e)=>{ setUsername(e.target.value)}}
             />

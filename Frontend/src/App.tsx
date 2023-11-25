@@ -17,13 +17,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<Home />} />
           <Route
-            path="/transaction"
-            element={
-              <Suspense fallback={<div>Loading Transaction History...</div>}>
-                <Transaction />
-              </Suspense>
-            }
-          />
+            path="/transaction" element={<Transaction />}/>
         </Routes>
       </Router>
     </div>
