@@ -113,7 +113,6 @@ function TransactionHistoryComponent() {
   return (
     <div>
       <h1>Transaction History</h1>
-      <...loading>
       <p>No transaction history available.</p>
     </div>
   );
