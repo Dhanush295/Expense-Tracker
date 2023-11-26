@@ -21,7 +21,7 @@ model Expenses {
   id             Int         @id @default(autoincrement())
   title          String
   description    String
-  date           DateTime
+  date           DateTime    
   amount         Int 
   type           String     @default("Income")
   category       String
