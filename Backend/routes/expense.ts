@@ -224,6 +224,26 @@ router.post('/signup', async (req: Request, res: Response) => {
         return res.status(400).json({message: error.messsage})
       }
     });
+
+    router.get('/me', authenticateJwt, async (req:Request, res: Response)=>{
+      try{
+        const id = req.headers['userId'] as string;
+        const userExist = await prisma.user.findUnique({
+          where: {
+            id : parseInt(id)
+          }
+        });
+
+        if(!userExist){
+          return res.status(400).json({message: "user Not found!"})
+        }
+
+        return res.status(200).json({ email: userExist.email})
+
+      }catch(error: any){
+        res.status(400).json({message: error.message})
+      }
+    });
   
     router.delete('/expense/:id', authenticateJwt, async (req: Request, res: Response)=>{
       try{
